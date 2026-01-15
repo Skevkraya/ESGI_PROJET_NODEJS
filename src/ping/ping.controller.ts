@@ -1,9 +1,5 @@
-import { Controller, Get } from "@nestjs/common";
+import type { Request, Response } from "express";
 
-@Controller()
-export class PingController {
-  @Get("ping")
-  ping(): { ok: boolean } {
-    return { ok: true };
-  }
-}
+export const ping = (_req: Request, res: Response): void => {
+  res.json({ ok: true });
+};

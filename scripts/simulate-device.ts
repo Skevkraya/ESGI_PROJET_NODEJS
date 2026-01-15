@@ -59,7 +59,7 @@ const generateTelemetry = (
   type: "climate" | "presence"
 ): Record<string, unknown> => {
   const base = {
-    ts: new Date().toISOString(),
+    timestamp: new Date().toISOString(),
     battery: Math.round(70 + Math.random() * 30), // 70-100%
   };
 
@@ -86,7 +86,7 @@ const registerDevice = async (
   deviceId: string,
   name: string,
   type: "climate" | "presence"
-): Promise<{ deviceKey: string; status: string }> => {
+): Promise<{ deviceAccessKey: string; status: string }> => {
   console.log(`📝 Enregistrement du device...`);
   console.log(`   ID: ${deviceId}`);
   console.log(`   Nom: ${name}`);
@@ -99,15 +99,15 @@ const registerDevice = async (
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
+    const errorData = (await response.json().catch(() => ({}))) as { message?: string };
     throw new Error(
-      `Erreur ${response.status}: ${error.message ?? response.statusText}`
+      `Erreur ${response.status}: ${errorData.message ?? response.statusText}`
     );
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as { deviceAccessKey: string; status: string };
   console.log(`✅ Enregistré avec succès`);
-  console.log(`   Device Key: ${data.deviceKey}`);
+  console.log(`   Device Access Key: ${data.deviceAccessKey}`);
   console.log(`   Status: ${data.status}`);
 
   return data;
@@ -122,13 +122,13 @@ const checkStatus = async (
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
+    const errorData = (await response.json().catch(() => ({}))) as { message?: string };
     throw new Error(
-      `Erreur ${response.status}: ${error.message ?? response.statusText}`
+      `Erreur ${response.status}: ${errorData.message ?? response.statusText}`
     );
   }
 
-  return response.json();
+  return response.json() as Promise<{ status: string; deviceId: string }>;
 };
 
 // Poll jusqu'à activation
@@ -177,9 +177,9 @@ const sendTelemetry = async (
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
+    const errorData = (await response.json().catch(() => ({}))) as { message?: string };
     throw new Error(
-      `Erreur ${response.status}: ${error.message ?? response.statusText}`
+      `Erreur ${response.status}: ${errorData.message ?? response.statusText}`
     );
   }
 
@@ -234,13 +234,13 @@ const main = async () => {
 
   try {
     // 1. Enregistrement
-    const { deviceKey } = await registerDevice(deviceId, name, type);
+    const { deviceAccessKey } = await registerDevice(deviceId, name, type);
 
     // 2. Attente d'activation
-    await waitForActivation(deviceKey);
+    await waitForActivation(deviceAccessKey);
 
     // 3. Envoi de télémétrie en boucle
-    await telemetryLoop(deviceKey, type);
+    await telemetryLoop(deviceAccessKey, type);
   } catch (error) {
     if (error instanceof Error) {
       console.error(`\n❌ Erreur fatale: ${error.message}`);

@@ -43,22 +43,22 @@ const main = async () => {
     );
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      
+      const errorData = (await response.json().catch(() => ({}))) as { message?: string };
+
       if (response.status === 404) {
         console.error(`❌ Device non trouvé: ${deviceId}`);
       } else if (response.status === 401) {
         console.error(`❌ Clé API invalide`);
       } else {
         console.error(`❌ Erreur ${response.status}: ${response.statusText}`);
-        if (error.message) {
-          console.error(`   ${error.message}`);
+        if (errorData.message) {
+          console.error(`   ${errorData.message}`);
         }
       }
       process.exit(1);
     }
 
-    const data = await response.json();
+    await response.json();
     console.log(`✅ Device approuvé avec succès`);
     console.log(`   Device ID: ${deviceId}`);
     console.log(`   Status: active`);

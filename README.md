@@ -21,7 +21,7 @@ pnpm install
 docker compose up -d
 
 # 4. Lancer le serveur en mode développement
-pnpm start:dev
+pnpm watch
 ```
 
 ## Vérification
@@ -35,27 +35,29 @@ curl http://localhost:3000/ping
 
 | Commande | Description |
 |----------|-------------|
-| `pnpm start:dev` | Lance le serveur en mode développement (watch) |
 | `pnpm start` | Lance le serveur |
-| `pnpm build` | Compile le projet |
-| `pnpm db:reset` | Vide toutes les collections de la base de données |
+| `pnpm watch` | Lance le serveur en mode watch (développement) |
+| `pnpm typecheck` | Vérifie les types TypeScript |
 | `pnpm simulate:device` | Simule un device IoT |
 | `pnpm admin:approve-device <deviceId>` | Approuve un device |
 | `pnpm admin:revoke-device <deviceId>` | Révoque un device |
+| `pnpm db:reset` | Remet à zéro la base de données |
 
 ## Structure du projet
 
 ```
 src/
-├── main.ts                 # Point d'entrée
-├── app.module.ts           # Module racine
-├── common/
-│   ├── database/           # Configuration MongoDB
-│   └── guards/             # Guards d'authentification (à implémenter)
-├── ping/                   # Module ping (health check)
-├── devices/                # Module devices (à implémenter)
-├── telemetry/              # Module telemetry (à implémenter)
-└── admin/                  # Module admin (à implémenter)
+├── app.ts                  # Configuration Express
+├── server.ts               # Point d'entrée
+├── db.ts                   # Connexion MongoDB
+├── routes/
+│   └── index.ts            # Agrégateur de routes
+├── ping/                   # Module ping (exemple)
+│   ├── ping.controller.ts
+│   └── ping.routes.ts
+├── devices/                # À implémenter
+├── telemetry/              # À implémenter
+└── admin/                  # À implémenter
 ```
 
 ## Ce que vous devez implémenter
