@@ -9,6 +9,7 @@
     "start": "node src/server.ts",
     "watch": "node --watch src/server.ts",
     "typecheck": "tsc",
+    "format": "prettier --write \"src/**/*.ts\" \"scripts/**/*.ts\"",
     "simulate:device": "node scripts/simulate-device.ts",
     "admin:approve-device": "node scripts/admin-approve-device.ts",
     "admin:revoke-device": "node scripts/admin-revoke-device.ts",
@@ -23,6 +24,7 @@
     "@tsconfig/node24": "^24.0.0",
     "@types/express": "^5.0.0",
     "@types/node": "^24.10.9",
+    "prettier": "^3.8.0",
     "typescript": "^5.7.0"
   },
   "engines": {
