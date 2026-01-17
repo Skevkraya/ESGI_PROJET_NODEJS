@@ -1,6 +1,10 @@
 import app from "./app.ts";
 import { connectDB } from "./db.ts";
 
+import "dotenv/config";
+
+console.log(process.env.ADMIN_API_KEY);
+
 const PORT = process.env.PORT || 3000;
 
 const start = async () => {
