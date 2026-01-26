@@ -3,6 +3,8 @@ import { Router } from "express";
 import { registerDeviceController } from "../controllers/devices.controller.ts";
 
 
-export const devicesRouter = Router();
+const devicesRouter = Router();
 
-devicesRouter.get("/devices/register", registerDeviceController);
+devicesRouter.post("/devices/register", registerDeviceController);
+
+export default devicesRouter;

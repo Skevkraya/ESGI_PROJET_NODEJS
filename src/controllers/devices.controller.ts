@@ -1,17 +1,16 @@
-import { Device } from "../types.ts";
+import type { Device } from "../types.ts";
 import type { Request, Response } from "express";
 import { devicesRepository } from "../repositories/devices.repository.ts";
 import { z } from "zod";
-import { id } from "zod/locales";
 
 export const registerDeviceController = async (req: Request, res: Response) => {
   const device: Device = req.body;
   const deviceAccessKey = "DEV-" + Math.random().toString(36).substring(2, 15);
 
   const CreateDeviceSchema = z.object({
-    deviceId: z.number().min(1),
+    deviceId: z.string().uuid(),
     name: z.string().min(2).max(100),
-    type: z.string().min(2).max(100),
+    type: z.enum(["climate", "presence"]),
   });
   const resultZod = CreateDeviceSchema.safeParse({
     ...device,

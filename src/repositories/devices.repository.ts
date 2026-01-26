@@ -12,5 +12,7 @@ export const devicesRepository = {
 
   insert: (device: Device) => collection().insertOne(device),
 
+  register: (device: Device) => collection().insertOne(device),
+
   deleteByMongoId: (id: ObjectId) => collection().deleteOne({ _id: id }),
 };
