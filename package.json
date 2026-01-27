@@ -19,6 +19,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.0.1",
     "mongodb": "^7.0.0",
+    "pnpm": "^10.28.2",
     "zod": "^4.3.5"
   },
   "devDependencies": {

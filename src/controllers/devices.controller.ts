@@ -26,14 +26,49 @@ export const registerDeviceController = async (req: Request, res: Response) => {
     const result = await devicesRepository.register({
       ...device,
       deviceAccessKey: deviceAccessKey,
+      status: "pending",
       createdAt: new Date(),
     });
     return res.status(201).json({
       message: "Device registered successfully",
       deviceAccessKey: deviceAccessKey,
+      status: "pending",
     });
   } catch (error) {
     console.error("Error registering device:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const pollStatus = async (req: Request, res: Response) => {
+  const rawKey = req.headers['x-device-key'];
+
+  const CreateDeviceSchema = z.object({
+    deviceAccessKey: z.string(),
+  })
+  const resultZod = CreateDeviceSchema.safeParse({
+    deviceAccessKey: rawKey,
+  });
+
+  if (!resultZod.success) {
+    return res
+      .status(400)
+      .json({ message: "Invalid device data", errors: resultZod.error });
+  }
+
+  try {
+    const device = await devicesRepository.findByDeviceAccesKey(
+    resultZod.data.deviceAccessKey
+  );
+  console.log(device);
+  if (!device) {
+      return res.status(404).json({ message: "Device not found" });
+    }
+  return res.json({
+    status: device.status,          
+    deviceId: device.deviceId.toString()
+  });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error" });
+  }
+}
