@@ -5,7 +5,7 @@ import { registerDeviceController, pollStatus } from "../controllers/devices.con
 
 const devicesRouter = Router();
 
-devicesRouter.get("/devices/me", pollStatus);
-devicesRouter.post("/devices/register", registerDeviceController);
+devicesRouter.get("/me", pollStatus);
+devicesRouter.post("/register", registerDeviceController);
 
 export default devicesRouter;

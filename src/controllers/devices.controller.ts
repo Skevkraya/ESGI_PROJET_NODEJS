@@ -60,7 +60,6 @@ export const pollStatus = async (req: Request, res: Response) => {
     const device = await devicesRepository.findByDeviceAccesKey(
     resultZod.data.deviceAccessKey
   );
-  console.log(device);
   if (!device) {
       return res.status(404).json({ message: "Device not found" });
     }
