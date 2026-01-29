@@ -11,4 +11,8 @@ export const adminRepository = {
     })
     .skip(offset)
     .limit(limit).toArray(),
+  
+  updateStatus: (deviceId: string, status: string) =>
+    collection().updateOne( {deviceId: deviceId}, { $set: { status: status } }),
+
 };

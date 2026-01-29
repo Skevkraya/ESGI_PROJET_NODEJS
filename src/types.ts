@@ -1,5 +1,5 @@
 export type Device = {
-  deviceId: number;
+  deviceId: string;
   name: string;
   type: string;
   deviceAccessKey: string;

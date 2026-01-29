@@ -10,6 +10,7 @@
  *   API_URL      - URL de l'API (défaut: http://localhost:3000)
  *   ADMIN_API_KEY - Clé API admin (requis)
  */
+import "dotenv/config";
 
 const API_URL = process.env.API_URL ?? "http://localhost:3000";
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY;

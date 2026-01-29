@@ -18,3 +18,16 @@ export const getAllDevices = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Server error" });
   }
 }
+
+export const approveDevice = async (req: Request, res: Response) => {
+  const id: string = req.params.id as string;
+  const status = "active";
+
+  try {
+    const result = await adminRepository.updateStatus(id, status);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error approving device:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
