@@ -6,3 +6,11 @@ export type Device = {
   status: string;
   createdAt: Date;
 };
+
+export type Telemetry = {
+  timestamp: Date;
+  temperature: number;
+  humidity: number;
+  motion: number;
+  battery: number;
+}
