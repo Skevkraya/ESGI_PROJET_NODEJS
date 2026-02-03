@@ -8,9 +8,10 @@ export type Device = {
 };
 
 export type Telemetry = {
+  deviceId: string;
   timestamp: Date;
-  temperature: number;
-  humidity: number;
-  motion: number;
-  battery: number;
-}
+  temperature?: number;
+  humidity?: number;
+  motion?: boolean;
+  battery?: number;
+};
