@@ -14,7 +14,7 @@ export const registerDeviceController = async (req: Request, res: Response) => {
   });
   const resultZod = CreateDeviceSchema.safeParse({
     ...device,
-    deviceAccessKey: deviceAccessKey,
+    deviceAccessKey: deviceAccessKey, //pourquoi on a créer et rajouter la clé ici?
   });
   if (!resultZod.success) {
     return res
@@ -24,13 +24,13 @@ export const registerDeviceController = async (req: Request, res: Response) => {
 
   try {
     const result = await devicesRepository.register({
-      ...device,
+      ...device, //pourquoi c pas resultZod?les bonnes valeurs sont récupèrées aprés le parse
       deviceAccessKey: deviceAccessKey,
       status: "pending",
       createdAt: new Date(),
     });
     return res.status(201).json({
-      message: "Device registered successfully",
+      message: "Device registered successfully", //revoir le retour sur le doc des consignes
       deviceAccessKey: deviceAccessKey,
       status: "pending",
     });
@@ -41,11 +41,11 @@ export const registerDeviceController = async (req: Request, res: Response) => {
 };
 
 export const pollStatus = async (req: Request, res: Response) => {
-  const rawKey = req.headers['x-device-key'];
+  const rawKey = req.headers["x-device-key"];
 
   const CreateDeviceSchema = z.object({
     deviceAccessKey: z.string(),
-  })
+  });
   const resultZod = CreateDeviceSchema.safeParse({
     deviceAccessKey: rawKey,
   });
@@ -58,16 +58,16 @@ export const pollStatus = async (req: Request, res: Response) => {
 
   try {
     const device = await devicesRepository.findByDeviceAccesKey(
-    resultZod.data.deviceAccessKey
-  );
-  if (!device) {
+      resultZod.data.deviceAccessKey,
+    );
+    if (!device) {
       return res.status(404).json({ message: "Device not found" });
     }
-  return res.json({
-    status: device.status,          
-    deviceId: device.deviceId.toString()
-  });
+    return res.json({
+      status: device.status,
+      deviceId: device.deviceId.toString(),
+    });
   } catch (error) {
     return res.status(500).json({ message: "Server error" });
   }
-}
+};

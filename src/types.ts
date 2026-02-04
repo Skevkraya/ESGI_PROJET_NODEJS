@@ -3,6 +3,6 @@ export type Device = {
   name: string;
   type: string;
   deviceAccessKey: string;
-  status: string;
+  status: string;//le redefinir comme enum
   createdAt: Date;
 };
