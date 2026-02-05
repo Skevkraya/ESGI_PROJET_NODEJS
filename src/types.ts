@@ -3,6 +3,7 @@ export type Device = {
   name: string;
   type: string;
   deviceAccessKey: string;
-  status: string;//le redefinir comme enum
+  status: Status;//le redefinir comme enum
   createdAt: Date;
 };
+export type Status="pending"|"active"|"revoked"
