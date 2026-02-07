@@ -8,7 +8,7 @@ const router = Router();
 
 router.use(pingRoutes);
 router.use("/devices", devicesRoutes);
-router.use("/admin", adminRoutes);
+router.use("/admin", adminRoutes, checkAdminApiKey);
 
 
 
