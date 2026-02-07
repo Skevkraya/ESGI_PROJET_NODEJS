@@ -38,7 +38,9 @@ export const approveDevice = async (req: Request, res: Response) => {
 //n'oublie pas de checker l'admin
 export const getDeviceById = async (req: Request, res: Response) => {
   const idShema = z.object({
-    devId: z.coerce.string().length(24),
+    //pour le cas de :id
+    //devId: z.coerce.string().length(24),
+    devId: z.coerce.string(),
   });
   //safeParse for ckecking the result
   const devIdResult = idShema.safeParse(req.params);
@@ -64,7 +66,9 @@ export const revokedDevice = async (req: Request, res: Response) => {
   //il faut qu'on vérifie les retour donc si c revoke on va avoir comme rep OK
 
   const deviceId = z.object({
-    devId: z.coerce.string().length(24),
+    devId: z.coerce.string(),
+    //pour le cas de :id
+    //devId: z.coerce.string().length(24),
   });
   const devIdResult = deviceId.safeParse(req.params);
   if (!devIdResult.success) {
@@ -89,24 +93,27 @@ export const revokedDevice = async (req: Request, res: Response) => {
   res.json({ message: "ok", body: deviceUpdated });
 };
 
-export const lastMesure = async (req: Request, res: Response) => {
-
-  const deviceId = z.object({
-    devId: z.coerce.string(),
+export const lastMeasure = async (req: Request, res: Response) => {
+  const deviceIdShema = z.object({
+    deviceId: z.coerce.string(),
     //devId: z.coerce.string().length(24), dans le cas de :id
   });
 
-  const devIdResult = deviceId.safeParse(req.params);
+  const devIdResult = deviceIdShema.safeParse(req.params);
   if (!devIdResult.success) {
     console.log("devId", devIdResult);
-    return res
-      .status(400)
-      .json({ message: "Invalid url parameter" });
+    return res.status(400).json({ message: "Invalid url parameter" });
   }
-  const { devId } = devIdResult.data;
+  const { deviceId } = devIdResult.data;
+  const result = await adminRepository.getDevicesById(deviceId);
+  if (!result) {
+    return res.status(404).json({ message: "Device not found" });
+  }
   //créer un index pour le deviceId
-  //db.devices.createIndex({ deviceId: 1 })
-  //db.devices.createIndex({ deviceId: 1 }, { unique: true });
-  const deviceUpdated = await adminRepository.getLastMesure(devId);
-
+  const deviceTelemetryResult = await adminRepository.getLastMeasure(deviceId);
+  if (!result) {
+    return res.status(404).json({ message: "Device not found" });
+  }
+  res.status(200);
+  res.status(200).json(deviceTelemetryResult);
 };

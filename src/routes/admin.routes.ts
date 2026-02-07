@@ -5,7 +5,7 @@ import {
   approveDevice,
   getDeviceById,
   revokedDevice,
-  lastMesure
+  lastMeasure,
 } from "../controllers/admin.controller.ts";
 
 const adminRouter = Router();
@@ -16,6 +16,6 @@ adminRouter.post("/devices/:id/approve", approveDevice);
 //
 adminRouter.get("/devices/:devId", getDeviceById);
 adminRouter.post("/devices/:devId/revoke", revokedDevice);
-adminRouter.get("/devices/:id/telemetry/latest",lastMesure);
+adminRouter.get("/devices/:deviceId/telemetry/latest", lastMeasure);
 
 export default adminRouter;
