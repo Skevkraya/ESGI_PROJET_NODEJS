@@ -83,7 +83,30 @@ export const revokedDevice = async (req: Request, res: Response) => {
   if (!deviceRevoked) {
     return res.status(400).json({ message: "Bad request" });
   }
+  //récup pour afficher
   const deviceUpdated = await adminRepository.getDevicesById(devId);
   res.status(200);
   res.json({ message: "ok", body: deviceUpdated });
+};
+
+export const lastMesure = async (req: Request, res: Response) => {
+
+  const deviceId = z.object({
+    devId: z.coerce.string(),
+    //devId: z.coerce.string().length(24), dans le cas de :id
+  });
+
+  const devIdResult = deviceId.safeParse(req.params);
+  if (!devIdResult.success) {
+    console.log("devId", devIdResult);
+    return res
+      .status(400)
+      .json({ message: "Invalid url parameter" });
+  }
+  const { devId } = devIdResult.data;
+  //créer un index pour le deviceId
+  //db.devices.createIndex({ deviceId: 1 })
+  //db.devices.createIndex({ deviceId: 1 }, { unique: true });
+  const deviceUpdated = await adminRepository.getLastMesure(devId);
+
 };
