@@ -7,3 +7,12 @@ export type Device = {
   createdAt: Date;
 };
 export type Status="pending"|"active"|"revoked"
+
+export type Telemetry = {
+  deviceId: string;
+  timestamp: Date;
+  temperature?: number;
+  humidity?: number;
+  motion?: boolean;
+  battery?: number;
+};

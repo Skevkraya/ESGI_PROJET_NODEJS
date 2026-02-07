@@ -2,6 +2,7 @@ import type { Device } from "../types.ts";
 import type { Request, Response } from "express";
 import { devicesRepository } from "../repositories/devices.repository.ts";
 import { z } from "zod";
+import { authenticateDevice } from "../middlewares/authDevice.middleware.ts";
 
 export const registerDeviceController = async (req: Request, res: Response) => {
   const device: Device = req.body;
@@ -41,33 +42,24 @@ export const registerDeviceController = async (req: Request, res: Response) => {
 };
 
 export const pollStatus = async (req: Request, res: Response) => {
-  const rawKey = req.headers["x-device-key"];
-
-  const CreateDeviceSchema = z.object({
-    deviceAccessKey: z.string(),
-  });
-  const resultZod = CreateDeviceSchema.safeParse({
-    deviceAccessKey: rawKey,
-  });
-
-  if (!resultZod.success) {
-    return res
-      .status(400)
-      .json({ message: "Invalid device data", errors: resultZod.error });
+  // Authentifier le device
+  const authResult = await authenticateDevice(req);
+  if (!authResult.success) {
+    return res.status(authResult.status).json({ message: authResult.message });
   }
 
-  try {
-    const device = await devicesRepository.findByDeviceAccesKey(
-      resultZod.data.deviceAccessKey,
-    );
-    if (!device) {
-      return res.status(404).json({ message: "Device not found" });
-    }
-    return res.json({
-      status: device.status,
-      deviceId: device.deviceId.toString(),
-    });
-  } catch (error) {
-    return res.status(500).json({ message: "Server error" });
+  const device = authResult.device;
+
+  // Device révoqué ne peut pas poll (403)
+  if (device.status === "revoked") {
+    return res.status(403).json({ message: "Forbidden" });
   }
+
+  // Retourner les infos (pending et active peuvent poll)
+  return res.json({
+    deviceId: device.deviceId,
+    name: device.name,
+    type: device.type,
+    status: device.status,
+  });
 };
