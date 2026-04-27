@@ -1,13 +1,20 @@
-import type { Device, Status } from "../types.ts";
 import type { Request, Response } from "express";
 import { adminRepository } from "../repositories/admin.repository.ts";
-import { json, z } from "zod";
-import strict from "assert/strict";
+import {
+  deviceIdParamSchema,
+  listDevicesQuerySchema,
+  telemetryListSchema,
+} from "../schemas/admin.schema.ts";
 
 export const getAllDevices = async (req: Request, res: Response) => {
-  const status: Status = req.query.status as Status;
-  const limit: number = parseInt(req.query.limit as string);
-  const offset: number = parseInt(req.query.offset as string);
+  const validation = listDevicesQuerySchema.safeParse(req.query);
+  if (!validation.success) {
+    return res.status(400).json({
+      message: "Invalid query parameters",
+      errors: validation.error.issues,
+    });
+  }
+  const { status, limit, offset } = validation.data;
 
   try {
     const device = await adminRepository.findAll(limit, offset, status);
@@ -21,7 +28,14 @@ export const getAllDevices = async (req: Request, res: Response) => {
 };
 
 export const approveDevice = async (req: Request, res: Response) => {
-  const id: string = req.params.id as string;
+  const paramsResult = deviceIdParamSchema.safeParse(req.params);
+  if (!paramsResult.success) {
+    return res.status(400).json({
+      message: "Invalid url parameter",
+      errors: paramsResult.error.issues,
+    });
+  }
+  const { id } = paramsResult.data;
   const status = "active";
 
   try {
@@ -34,37 +48,32 @@ export const approveDevice = async (req: Request, res: Response) => {
 };
 
 export const getDeviceById = async (req: Request, res: Response) => {
-  const idShema = z.object({
-    devId: z.coerce.string(),
-  });
-  const devIdResult = idShema.safeParse(req.params);
-  if (!devIdResult.success) {
-    return res
-      .status(400)
-      .json({ message: "Invalid url parameter:id is wrong" });
+  const paramsResult = deviceIdParamSchema.safeParse({ id: req.params.devId });
+  if (!paramsResult.success) {
+    return res.status(400).json({
+      message: "Invalid url parameter",
+      errors: paramsResult.error.issues,
+    });
   }
+  const { id: devId } = paramsResult.data;
 
-  const { devId } = devIdResult.data;
   const result = await adminRepository.getDevicesById(devId);
   if (!result) {
     return res.status(404).json({ message: "Device not found" });
   }
-  res.json(result);
-  return devId;
+  return res.json(result);
 };
 
 export const revokedDevice = async (req: Request, res: Response) => {
-  const deviceId = z.object({
-    devId: z.coerce.string(),
-  });
-  const devIdResult = deviceId.safeParse(req.params);
-  if (!devIdResult.success) {
-    console.log("devId", devIdResult);
-    return res
-      .status(400)
-      .json({ message: "Invalid url parameter:id is wrong" });
+  const paramsResult = deviceIdParamSchema.safeParse({ id: req.params.devId });
+  if (!paramsResult.success) {
+    return res.status(400).json({
+      message: "Invalid url parameter",
+      errors: paramsResult.error.issues,
+    });
   }
-  const { devId } = devIdResult.data;
+  const { id: devId } = paramsResult.data;
+
   const device = await adminRepository.getDevicesById(devId);
   if (!device) {
     return res.status(404).json({ message: "Device not found" });
@@ -74,53 +83,31 @@ export const revokedDevice = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "Bad request" });
   }
   const deviceUpdated = await adminRepository.getDevicesById(devId);
-  res.status(200);
-  res.json({ message: "ok", body: deviceUpdated });
+  return res.status(200).json({ message: "ok", body: deviceUpdated });
 };
 
 export const lastMeasure = async (req: Request, res: Response) => {
-  const deviceIdShema = z.object({
-    deviceId: z.coerce.string(),
+  const paramsResult = deviceIdParamSchema.safeParse({
+    id: req.params.deviceId,
   });
-
-  const devIdResult = deviceIdShema.safeParse(req.params);
-  if (!devIdResult.success) {
-    console.log("devId", devIdResult);
-    return res.status(400).json({ message: "Invalid url parameter" });
+  if (!paramsResult.success) {
+    return res.status(400).json({
+      message: "Invalid url parameter",
+      errors: paramsResult.error.issues,
+    });
   }
-  const { deviceId } = devIdResult.data;
+  const { id: deviceId } = paramsResult.data;
+
   const result = await adminRepository.getDevicesById(deviceId);
   if (!result) {
     return res.status(404).json({ message: "Device not found" });
   }
   const deviceTelemetryResult = await adminRepository.getLastMeasure(deviceId);
-  if (!result) {
-    return res.status(404).json({ message: "Device not found" });
-  }
-  res.status(200).json(deviceTelemetryResult);
+  return res.status(200).json(deviceTelemetryResult);
 };
 
-const getTelemetryByIdSchema = z.object({
-  params: z.object({
-    id: z.string("Invalid device ID format"),
-  }),
-  query: z.object({
-    limit: z.coerce
-      .number()
-      .int("Limit must be an integer")
-      .min(1, "Limit must be at least 1")
-      .max(100, "Limit cannot exceed 100")
-      .default(20),
-    offset: z.coerce
-      .number()
-      .int("Offset must be an integer")
-      .min(0, "Offset cannot be negative")
-      .default(0),
-  }),
-});
-
 export const getTelemetryById = async (req: Request, res: Response) => {
-  const validation = getTelemetryByIdSchema.safeParse({
+  const validation = telemetryListSchema.safeParse({
     params: req.params,
     query: req.query,
   });

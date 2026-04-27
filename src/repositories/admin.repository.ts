@@ -6,7 +6,7 @@ const devicesCollection = () => getDB().collection<Device>("devices");
 const telemetryCollection = () => getDB().collection<Telemetry>("telemetry");
 
 export const adminRepository = {
-  findAll: (limit: number, offset: number, status: Status) =>
+  findAll: (limit: number, offset: number, status?: Status) =>
     devicesCollection()
       .find({
         ...(status && { status }),
