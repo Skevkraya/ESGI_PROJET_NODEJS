@@ -1,7 +1,10 @@
 import type { Request, Response } from "express";
 import { z } from "zod";
 import { telemetryRepository } from "../repositories/telemetry.repository.ts";
-import { authenticateDevice, requireActive } from "../middlewares/authDevice.middleware.ts";
+import {
+  authenticateDevice,
+  requireActive,
+} from "../middlewares/authDevice.middleware.ts";
 
 // Schéma de base commun
 const baseTelemetrySchema = z.object({
@@ -30,17 +33,24 @@ export const sendTelemetry = async (req: Request, res: Response) => {
   // 2. Vérifier que le device est actif
   const activeResult = requireActive(authResult.device);
   if (!activeResult.success) {
-    return res.status(activeResult.status).json({ message: activeResult.message });
+    return res
+      .status(activeResult.status)
+      .json({ message: activeResult.message });
   }
 
   const device = authResult.device;
 
   // 3. Valider les données selon le type du device
-  const schema = device.type === "climate" ? climateTelemetrySchema : presenceTelemetrySchema;
+  const schema =
+    device.type === "climate"
+      ? climateTelemetrySchema
+      : presenceTelemetrySchema;
   const result = schema.safeParse(req.body);
 
   if (!result.success) {
-    return res.status(400).json({ message: "Bad Request", errors: result.error.issues });
+    return res
+      .status(400)
+      .json({ message: "Bad Request", errors: result.error.issues });
   }
 
   // 4. Insérer la télémétrie

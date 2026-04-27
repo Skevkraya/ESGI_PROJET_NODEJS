@@ -10,8 +10,6 @@ const router = Router();
 router.use(pingRoutes);
 router.use(telemetryRoutes);
 router.use("/devices", devicesRoutes);
-router.use("/admin", adminRoutes);
-
-
+router.use("/admin", checkAdminApiKey, adminRoutes);
 
 export default router;

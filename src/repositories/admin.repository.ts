@@ -2,12 +2,12 @@ import { ObjectId, UUID } from "mongodb";
 import { getDB } from "../db.ts";
 import type { Device, Status, Telemetry } from "../types.ts";
 
-const collection = () => getDB().collection<Device>("devices");
-const collectionTelemetry = () => getDB().collection<Telemetry>("telemetry");
+const devicesCollection = () => getDB().collection<Device>("devices");
+const telemetryCollection = () => getDB().collection<Telemetry>("telemetry");
 
 export const adminRepository = {
   findAll: (limit: number, offset: number, status: Status) =>
-    collection()
+    devicesCollection()
       .find({
         ...(status && { status }),
       })
@@ -16,26 +16,25 @@ export const adminRepository = {
       .toArray(),
 
   updateStatus: (deviceId: string, status: Status) =>
-    collection().updateOne(
-      //pourquoi ce n'est pas id?,sur la requete s'est écrit :id et non pas :deviceId
+    devicesCollection().updateOne(
       { deviceId: deviceId },
       { $set: { status: status } },
     ),
 
-  //async pcq c une promise vu qu'il attend le retour de la bdd
   getDevicesById: async (devId: string) => {
-    //const id = new ObjectId(devId);
-    return collection().findOne({ deviceId: devId });
+    return devicesCollection().findOne({ deviceId: devId });
   },
+
   revokeStatus: async (devId: string) => {
     const id = new ObjectId(devId);
-    return collection().updateOne({ _id: id }, { $set: { status: "revoked" } });
+    return devicesCollection().updateOne(
+      { _id: id },
+      { $set: { status: "revoked" } },
+    );
   },
 
   getLastMeasure: async (devId: string) => {
-    //index pour faciliter la lécture
-    //collection().createIndex({ deviceId: 1 });
-    return collectionTelemetry()
+    return telemetryCollection()
       .aggregate([
         { $match: { deviceId: devId } },
         { $sort: { timestamp: -1 } },
@@ -44,5 +43,30 @@ export const adminRepository = {
         },
       ])
       .toArray();
+  },
+
+  getTelemetryById: async (
+    limit: number,
+    offset: number,
+    deviceId: string,
+  ) => {
+    const data = await telemetryCollection()
+      .find({ deviceId })
+      .project({ _id: 0, deviceId: 0 })
+      .sort({ timestamp: -1 })
+      .skip(offset)
+      .limit(limit)
+      .toArray();
+
+    const total = await telemetryCollection().countDocuments({ deviceId });
+
+    return {
+      data,
+      pagination: {
+        total,
+        limit,
+        offset,
+      },
+    };
   },
 };

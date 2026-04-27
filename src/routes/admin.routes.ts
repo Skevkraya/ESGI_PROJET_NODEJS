@@ -6,6 +6,7 @@ import {
   getDeviceById,
   revokedDevice,
   lastMeasure,
+  getTelemetryById,
 } from "../controllers/admin.controller.ts";
 
 const adminRouter = Router();
@@ -13,9 +14,9 @@ const adminRouter = Router();
 //il faut utiliser checkAdminApiKey
 adminRouter.get("/devices", getAllDevices);
 adminRouter.post("/devices/:id/approve", approveDevice);
-//
 adminRouter.get("/devices/:devId", getDeviceById);
 adminRouter.post("/devices/:devId/revoke", revokedDevice);
 adminRouter.get("/devices/:deviceId/telemetry/latest", lastMeasure);
+adminRouter.get("/devices/:id/telemetry", getTelemetryById);
 
 export default adminRouter;
