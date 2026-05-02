@@ -25,22 +25,21 @@ export const adminRepository = {
     return devicesCollection().findOne({ deviceId: devId });
   },
 
-  //
-  revokeStatus:async(devId:string)=>{
-    //à enlever
+  revokeStatus: async (devId: string) => {
     //const id = new ObjectId(devId);
-    //voir avec le deviceId
-    return devicesCollection().updateOne({deviceId:devId},{$set:{status:"revoked"}})
-  }
-  
+    return devicesCollection().updateOne(
+      { deviceId: devId },
+      { $set: { status: "revoked" } },
+    );
+  },
+
   /*revokeStatus: async (devId: string) => {
     const id = new ObjectId(devId);
     return devicesCollection().updateOne(
       { _id: id },
       { $set: { status: "revoked" } },
     );
-  }*/,
-
+  }*/
   getLastMeasure: async (devId: string) => {
     return telemetryCollection()
       .aggregate([
@@ -53,11 +52,7 @@ export const adminRepository = {
       .toArray();
   },
 
-  getTelemetryById: async (
-    limit: number,
-    offset: number,
-    deviceId: string,
-  ) => {
+  getTelemetryById: async (limit: number, offset: number, deviceId: string) => {
     const data = await telemetryCollection()
       .find({ deviceId })
       .project({ _id: 0, deviceId: 0 })
