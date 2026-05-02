@@ -1,4 +1,3 @@
-import { ObjectId, UUID } from "mongodb";
 import { getDB } from "../db.ts";
 import type { Device, Status, Telemetry } from "../types.ts";
 
@@ -26,9 +25,8 @@ export const adminRepository = {
   },
 
   revokeStatus: async (devId: string) => {
-    const id = new ObjectId(devId);
     return devicesCollection().updateOne(
-      { _id: id },
+      { deviceId: devId },
       { $set: { status: "revoked" } },
     );
   },
@@ -66,6 +64,62 @@ export const adminRepository = {
         total,
         limit,
         offset,
+      },
+    };
+  },
+
+  getDeviceStats: async (
+    deviceId: string,
+    deviceType: string,
+    from: Date,
+    to: Date,
+  ) => {
+    const [stats] = await telemetryCollection()
+      .aggregate([
+        {
+          $match: {
+            deviceId,
+            timestamp: { $gte: from, $lte: to },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            count: { $sum: 1 },
+            temperatureMin: { $min: "$temperature" },
+            temperatureMax: { $max: "$temperature" },
+            temperatureAvg: { $avg: "$temperature" },
+            humidityMin: { $min: "$humidity" },
+            humidityMax: { $max: "$humidity" },
+            humidityAvg: { $avg: "$humidity" },
+            motionDetected: {
+              $sum: {
+                $cond: [{ $eq: ["$motion", true] }, 1, 0],
+              },
+            },
+          },
+        },
+      ])
+      .toArray();
+
+    if (deviceType === "presence") {
+      return {
+        count: stats?.count ?? 0,
+        motionDetected: stats?.motionDetected ?? 0,
+      };
+    }
+
+    return {
+      count: stats?.count ?? 0,
+      temperature: {
+        min: stats?.temperatureMin ?? null,
+        max: stats?.temperatureMax ?? null,
+        avg: stats?.temperatureAvg ?? null,
+      },
+      humidity: {
+        min: stats?.humidityMin ?? null,
+        max: stats?.humidityMax ?? null,
+        avg: stats?.humidityAvg ?? null,
       },
     };
   },

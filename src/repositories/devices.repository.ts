@@ -1,4 +1,4 @@
-import { ObjectId, UUID } from "mongodb";
+import { ObjectId } from "mongodb";
 import { getDB } from "../db.ts";
 import type { Device } from "../types.ts";
 

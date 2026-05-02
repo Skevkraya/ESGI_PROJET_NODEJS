@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { adminRepository } from "../repositories/admin.repository.ts";
 import {
+  deviceStatsSchema,
   deviceIdParamSchema,
   listDevicesQuerySchema,
   telemetryListSchema,
@@ -123,11 +124,17 @@ export const getTelemetryById = async (req: Request, res: Response) => {
   const { limit, offset } = validation.data.query;
 
   try {
+    const device = await adminRepository.getDevicesById(deviceId);
+    if (!device) {
+      return res.status(404).json({ message: "Device not found" });
+    }
+
     const result = await adminRepository.getTelemetryById(
       limit,
       offset,
       deviceId,
     );
+    const { total } = result.pagination;
 
     const formattedData = result.data.map((item) => ({
       ...item,
@@ -139,10 +146,55 @@ export const getTelemetryById = async (req: Request, res: Response) => {
 
     return res.json({
       data: formattedData,
-      pagination: result.pagination,
+      pagination: {
+        ...result.pagination,
+        count: formattedData.length,
+        hasPrevious: offset > 0,
+        hasNext: offset + formattedData.length < total,
+      },
     });
   } catch (error) {
     console.error("Error getting telemetry:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getDeviceStats = async (req: Request, res: Response) => {
+  const validation = deviceStatsSchema.safeParse({
+    params: req.params,
+    query: req.query,
+  });
+
+  if (!validation.success) {
+    return res.status(400).json({
+      message: "Invalid request parameters",
+      errors: validation.error.issues,
+    });
+  }
+
+  const { id: deviceId } = validation.data.params;
+  const { from, to } = validation.data.query;
+
+  try {
+    const device = await adminRepository.getDevicesById(deviceId);
+    if (!device) {
+      return res.status(404).json({ message: "Device not found" });
+    }
+
+    const stats = await adminRepository.getDeviceStats(
+      deviceId,
+      device.type,
+      from,
+      to,
+    );
+
+    return res.status(200).json({
+      from: from.toISOString(),
+      to: to.toISOString(),
+      ...stats,
+    });
+  } catch (error) {
+    console.error("Error getting device stats:", error);
     return res.status(500).json({ message: "Server error" });
   }
 };

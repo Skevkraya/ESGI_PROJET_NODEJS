@@ -36,6 +36,20 @@ export const telemetryListSchema = z.object({
   }),
 });
 
+export const deviceStatsSchema = z.object({
+  params: deviceIdParamSchema,
+  query: z
+    .object({
+      from: z.coerce.date(),
+      to: z.coerce.date(),
+    })
+    .refine((data) => data.from <= data.to, {
+      message: "'from' must be before or equal to 'to'",
+      path: ["from"],
+    }),
+});
+
 export type DeviceIdParam = z.infer<typeof deviceIdParamSchema>;
 export type ListDevicesQuery = z.infer<typeof listDevicesQuerySchema>;
 export type TelemetryListInput = z.infer<typeof telemetryListSchema>;
+export type DeviceStatsInput = z.infer<typeof deviceStatsSchema>;

@@ -1,10 +1,10 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import "dotenv/config";
 
 export const checkAdminApiKey = async (
   req: Request,
   res: Response,
-  next: any,
+  next: NextFunction,
 ) => {
   const adminApiKey = req.headers["x-api-key"];
 
