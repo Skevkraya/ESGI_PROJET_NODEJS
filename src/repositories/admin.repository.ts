@@ -25,13 +25,21 @@ export const adminRepository = {
     return devicesCollection().findOne({ deviceId: devId });
   },
 
-  revokeStatus: async (devId: string) => {
+  //
+  revokeStatus:async(devId:string)=>{
+    //à enlever
+    //const id = new ObjectId(devId);
+    //voir avec le deviceId
+    return devicesCollection().updateOne({deviceId:devId},{$set:{status:"revoked"}})
+  }
+  
+  /*revokeStatus: async (devId: string) => {
     const id = new ObjectId(devId);
     return devicesCollection().updateOne(
       { _id: id },
       { $set: { status: "revoked" } },
     );
-  },
+  }*/,
 
   getLastMeasure: async (devId: string) => {
     return telemetryCollection()
