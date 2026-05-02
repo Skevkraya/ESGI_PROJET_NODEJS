@@ -27,7 +27,9 @@ export const adminRepository = {
     return collection().findOne({ _id: id });
   },
    revokeStatus:async(devId:string)=>{
+    //à enlever
     const id = new ObjectId(devId);
+    //voir avec le deviceId
     return collection().updateOne({_id:id},{$set:{status:"revoked"}})
   }
 }
