@@ -36,7 +36,8 @@ curl http://localhost:3000/ping
 | Commande | Description |
 |----------|-------------|
 | `pnpm start` | Lance le serveur |
-| `pnpm watch` | Lance le serveur en mode watch (développement) |
+| `pnpm start:dev` | Lance le serveur en mode watch (développement) |
+| `pnpm watch` | Idem `start:dev` |
 | `pnpm typecheck` | Vérifie les types TypeScript |
 | `pnpm simulate:device` | Simule un device IoT |
 | `pnpm admin:approve-device <deviceId>` | Approuve un device |
@@ -50,21 +51,15 @@ src/
 ├── app.ts                  # Configuration Express
 ├── server.ts               # Point d'entrée
 ├── db.ts                   # Connexion MongoDB
-├── routes/
-│   └── index.ts            # Agrégateur de routes
-├── ping/                   # Module ping (exemple)
-│   ├── ping.controller.ts
-│   └── ping.routes.ts
-├── devices/                # À implémenter
-├── telemetry/              # À implémenter
-└── admin/                  # À implémenter
+├── types.ts                # Types domaine (Device, Telemetry, Status)
+├── routes/                 # Définitions des routes Express
+├── controllers/            # Logique des handlers
+├── repositories/           # Accès MongoDB
+├── middlewares/            # Auth, gestion d'erreurs
+└── schemas/                # Validation Zod centralisée
 ```
 
-## Ce que vous devez implémenter
-
-Consultez le fichier **CONSIGNES.md** pour les spécifications complètes du projet.
-
-### Endpoints à développer
+## Endpoints
 
 **Device (auth: `x-device-key`)**
 - `POST /devices/register` - Demande d'accès
